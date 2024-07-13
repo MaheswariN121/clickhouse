@@ -1,0 +1,48 @@
+clickhouse:
+  image: clickhouse/clickhouse-server
+  tag: latest  # Replace with specific ClickHouse version if needed
+
+  config:
+    configPath: "/etc/clickhouse-server/"
+    configFile: "config.xml"
+
+  hotStorage:
+    size: 5Gi
+    storageClass: "standard"  # Replace with your storage class
+
+  coldStorage:
+    size: 10Gi
+    storageClass: "standard"  # Replace with your storage class
+
+  log:
+    path: "/var/log/clickhouse-server/"
+
+moveFactor: 0.2  # Move factor for hot-cold partitioning
+
+service:
+  type: ClusterIP
+  port: 8123
+
+volumes:
+  - name: clickhouse-config
+    configMap:
+      name: clickhouse-config
+  - name: clickhouse-data
+    persistentVolumeClaim:
+      claimName: clickhouse-hot-storage-pvc
+  - name: clickhouse-cold-data
+    persistentVolumeClaim:
+      claimName: clickhouse-cold-storage-pvc
+  - name: clickhouse-log
+    persistentVolumeClaim:
+      claimName: clickhouse-log-pvc
+
+volumeMounts:
+  - name: clickhouse-config
+    mountPath: /etc/clickhouse-server
+  - name: clickhouse-data
+    mountPath: /var/lib/clickhouse
+  - name: clickhouse-cold-data
+    mountPath: /var/lib/clickhouse-cold
+  - name: clickhouse-log
+    mountPath: /var/log/clickhouse-server

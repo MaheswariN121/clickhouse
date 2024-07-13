@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hot-storage
+spec:
+  accessModes: [ "ReadWriteOnce" ]
+  storageClassName: standard
+  resources:
+    requests:
+      storage: "5Gi"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cold-storage
+spec:
+  accessModes: [ "ReadWriteOnce" ]
+  storageClassName: standard
+  resources:
+    requests:
+      storage: "10Mi"

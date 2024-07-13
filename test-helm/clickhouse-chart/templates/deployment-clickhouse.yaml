@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clickhouse
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: clickhouse
+  template:
+    metadata:
+      labels:
+        app: clickhouse
+    spec:
+      securityContext:
+        fsGroup: 0  # Ensures all files are accessible by root
+        runAsUser: 0  # Run container as root
+        runAsGroup: 0  # Run container as root group
+      containers:
+      - name: clickhouse-server
+        image: yandex/clickhouse-server:latest
+        ports:
+        - containerPort: 8123
+          name: http
+        - containerPort: 9000
+          name: tcp
+        volumeMounts:
+        - name: config
+          mountPath: /etc/clickhouse-server/
+        - name: hot-storage
+          mountPath: /var/lib/clickhouse/data/hot
+        - name: cold-storage
+          mountPath: /var/lib/clickhouse/data/cold
+        - name: log-storage
+          mountPath: /var/log/clickhouse-server
+      volumes:
+      - name: config
+        configMap:
+          name: clickhouse-config
+      - name: hot-storage
+        emptyDir: {}  # Use emptyDir for testing to avoid PVC issues
+      - name: cold-storage
+        emptyDir: {}
+      - name: log-storage
+        emptyDir: {}
